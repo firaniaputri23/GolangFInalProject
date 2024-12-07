@@ -1,17 +1,17 @@
 package db
 
 import (
-	"database/sql"
-
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Database struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 func NewDatabase() (*Database, error) {
-	db, err := sql.Open("postgres", "postgresql://root:password@localhost:5433/go-chat?sslmode=disable")
+	dsn := "host=localhost user=root password=password dbname=go-chat port=5433 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
@@ -19,10 +19,14 @@ func NewDatabase() (*Database, error) {
 	return &Database{db: db}, nil
 }
 
-func (d *Database) Close() {
-	d.db.Close()
+func (d *Database) GetDB() *gorm.DB {
+	return d.db
 }
 
-func (d *Database) GetDB() *sql.DB {
-	return d.db
+func (d *Database) Close() error {
+	sqlDB, err := d.db.DB()
+	if err != nil {
+		return err
+	}
+	return sqlDB.Close()
 }

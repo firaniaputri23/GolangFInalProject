@@ -5,6 +5,7 @@ import { useRouter } from 'next/router'
 import { API_URL } from '../../constants'
 import autosize from 'autosize'
 import { AuthContext } from '../../modules/auth_provider'
+import LogoutButton from '../../components/LogoutButton'
 
 export type Message = {
   content: string
@@ -22,6 +23,13 @@ const index = () => {
   const { user } = useContext(AuthContext)
 
   const router = useRouter()
+
+  const handleBack = () => {
+    if (conn) {
+      conn.close()
+    }
+    router.push('/')
+  }
 
   useEffect(() => {
     if (conn === null) {
@@ -73,9 +81,9 @@ const index = () => {
       setMessage([...messages, m])
     }
 
-    conn.onclose = () => {}
-    conn.onerror = () => {}
-    conn.onopen = () => {}
+    conn.onclose = () => { }
+    conn.onerror = () => { }
+    conn.onopen = () => { }
   }, [textarea, messages, conn, users])
 
   const sendMessage = () => {
@@ -92,6 +100,18 @@ const index = () => {
   return (
     <>
       <div className='flex flex-col w-full'>
+        <div className='p-4 bg-grey'>
+          <button
+            onClick={handleBack}
+            className='px-4 py-2 text-white bg-blue rounded-md hover:bg-blue-600'
+          >
+            Back to Rooms
+          </button>
+        </div>
+        <div className='flex justify-between items-center p-4 bg-grey'>
+          <div className='text-xl font-bold'>Chat Room</div>
+          <LogoutButton />
+        </div>
         <div className='p-4 md:mx-6 mb-14'>
           <ChatBody data={messages} />
         </div>
