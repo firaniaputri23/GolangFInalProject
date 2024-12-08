@@ -21,6 +21,7 @@ Requirements: Go, Node, PostgreSQL
 
    ```bash
    git clone https://github.com/firaniaputri23/GolangFInalProject.git
+   cd GolangFInalProject
    ```
 
 2. Set up environment variables and run the server
