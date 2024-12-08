@@ -5,6 +5,7 @@ import { WEBSOCKET_URL } from '../constants'
 import { AuthContext } from '../modules/auth_provider'
 import { WebsocketContext } from '../modules/websocket_provider'
 import { useRouter } from 'next/router'
+import LogoutButton from '../components/LogoutButton'
 
 const index = () => {
   const [rooms, setRooms] = useState<{ id: string; name: string }[]>([])
@@ -70,6 +71,10 @@ const index = () => {
   return (
     <>
       <div className='my-8 px-4 md:mx-32 w-full h-full'>
+        <div className='flex justify-between items-center p-4 bg-grey'>
+          <h1 className='text-2xl font-bold'>Chat Rooms</h1>
+          <LogoutButton />
+        </div>
         <div className='flex justify-center mt-3 p-5'>
           <input
             type='text'

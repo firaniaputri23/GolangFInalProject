@@ -1,9 +1,8 @@
 package user
 
 import (
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type Handler struct {
@@ -17,39 +16,49 @@ func NewHandler(s Service) *Handler {
 }
 
 func (h *Handler) CreateUser(c *gin.Context) {
-	var u CreateUserReq
-	if err := c.ShouldBindJSON(&u); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req CreateUserReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	res, err := h.Service.CreateUser(c.Request.Context(), &u)
+	res, err := h.Service.CreateUser(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusCreated, res)
 }
 
 func (h *Handler) Login(c *gin.Context) {
-	var user LoginUserReq
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	var req LoginUserReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	u, err := h.Service.Login(c.Request.Context(), &user)
+	res, err := h.Service.Login(c.Request.Context(), &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
-	c.SetCookie("jwt", u.accessToken, 60*60*24, "/", "localhost", false, true)
-	c.JSON(http.StatusOK, u)
+	c.SetCookie("jwt", res.AccessToken, 60*60*24, "/", "localhost", false, true)
+	c.JSON(http.StatusOK, res)
 }
 
 func (h *Handler) Logout(c *gin.Context) {
 	c.SetCookie("jwt", "", -1, "", "", false, true)
-	c.JSON(http.StatusOK, gin.H{"message": "logout successful"})
+	c.JSON(http.StatusOK, gin.H{
+		"message": "logout successful",
+	})
 }

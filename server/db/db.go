@@ -1,28 +1,64 @@
 package db
 
 import (
-	"database/sql"
+	"fmt"
+	"os"
+	"strings"
 
-	_ "github.com/lib/pq"
+	"github.com/joho/godotenv"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Database struct {
-	db *sql.DB
+	db *gorm.DB
 }
 
 func NewDatabase() (*Database, error) {
-	db, err := sql.Open("postgres", "postgresql://root:password@localhost:5433/go-chat?sslmode=disable")
+	err := godotenv.Load("../.env")
+	if err != nil {
+		return nil, fmt.Errorf("Error loading environment variables: %v", err)
+	}
+
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
+	dbUsn := os.Getenv("DB_USERNAME")
+	dbPass := os.Getenv("DB_PASSWORD")
+
+	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s sslmode=disable",
+		dbHost, dbUsn, dbPass, dbPort)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		return nil, err
 	}
 
-	return &Database{db: db}, nil
+	// Create database
+	createDbCmd := fmt.Sprintf("CREATE DATABASE \"%s\";", dbName)
+	if res := db.Exec(createDbCmd); res.Error != nil {
+		if !strings.Contains(res.Error.Error(), "already exists") {
+			return nil, fmt.Errorf("Error creating database: %v", res.Error)
+		}
+	}
+
+	// Close first connection
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, err
+	}
+	sqlDB.Close()
+
+	// Connect with database name
+	dsnWithDB := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable",
+		dbHost, dbUsn, dbPass, dbPort, dbName)
+	dbWithName, err := gorm.Open(postgres.Open(dsnWithDB), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Database{db: dbWithName}, nil
 }
 
-func (d *Database) Close() {
-	d.db.Close()
-}
-
-func (d *Database) GetDB() *sql.DB {
+func (d *Database) GetDB() *gorm.DB {
 	return d.db
 }

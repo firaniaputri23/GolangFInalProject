@@ -68,6 +68,10 @@ const index = () => {
         >
           login
         </button>
+        <div className='mt-4 text-center'>
+          <span className='text-gray-600'>Don't have an account? </span>
+          <a href='/signup' className='text-blue hover:underline'>Sign up</a>
+        </div>
       </form>
     </div>
   )
