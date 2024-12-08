@@ -17,16 +17,26 @@ Final Project Mata Kuliah Pemrograman Berbasis Kerangka Kerja
 
 Requirements: Go, Node, PostgreSQL
 
-1. Clone the project
+1. Clone the repo
 
    ```bash
    git clone https://github.com/firaniaputri23/GolangFInalProject.git
    ```
 
-2. Run the server
+2. Set up environment variables and run the server
+
+   Copy .env.example to .env
 
    ```bash
    cd server
+   cp .env.example .env
+   ```
+
+   ...and then edit `.env`
+
+   Run the server
+
+   ```bash
    go run cmd/main.go
    ```
 
@@ -38,4 +48,3 @@ Requirements: Go, Node, PostgreSQL
    ```
 
 4. Access `http://localhost:3000` with your browser
-
