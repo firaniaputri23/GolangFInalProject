@@ -15,7 +15,7 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load()
 	if err != nil {
 		return nil, fmt.Errorf("Error loading environment variables: %v", err)
 	}
