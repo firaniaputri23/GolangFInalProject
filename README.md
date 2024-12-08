@@ -1,20 +1,41 @@
-#### 1. Running Backend Apps
-```sh
-$ go run main.go hub.go client.go
-```
+# Golang Chat
 
-#### 2. Running Frontend Apps
+Final Project Mata Kuliah Pemrograman Berbasis Kerangka Kerja
 
-Running Frontend Apps using NodeJS and module "http-server"
+## Architecture
 
-1. Install module for serve your project
-```sh
-$ npm i http-server
-```
+1. Domain Driven Design
 
-2. Running your project
-```sh
-http-server ./frontend -p 3000
-```
+   ![software architecture](./assets/architecture.png)
 
-3. Open then project in this url http://127.0.0.1:3000
+2. Hub
+
+   ![chat-hub](./assets/join_room.jpg)
+   ![hub-arch](./assets/hub_architecture.jpg)
+
+## How to use
+
+Requirements: Go, Node, PostgreSQL
+
+1. Clone the project
+
+   ```bash
+   git clone https://github.com/firaniaputri23/GolangFInalProject.git
+   ```
+
+2. Run the server
+
+   ```bash
+   cd server
+   go run cmd/main.go
+   ```
+
+3. Run the client with another terminal
+
+   ```bash
+   cd client
+   npm run dev
+   ```
+
+4. Access `http://localhost:3000` with your browser
+
