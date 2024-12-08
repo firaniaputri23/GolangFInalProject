@@ -26,7 +26,7 @@ Requirements: Go, Node, PostgreSQL
 
 2. Set up environment variables and run the server
 
-   Copy .env.example to .env
+   Copy `.env.example` to `.env`
 
    ```bash
    cd server
