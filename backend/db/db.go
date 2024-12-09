@@ -3,7 +3,7 @@ package db
 import (
 	"fmt"
 	"os"
-	"strings"
+	// "strings"
 
 	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
@@ -15,49 +15,56 @@ type Database struct {
 }
 
 func NewDatabase() (*Database, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("Error loading environment variables: %v", err)
-	}
+    err := godotenv.Load()
+    if err != nil {
+        return nil, fmt.Errorf("error loading environment variables: %v", err)
+    }
 
-	dbHost := os.Getenv("DB_HOST")
-	dbName := os.Getenv("DB_NAME")
-	dbPort := os.Getenv("DB_PORT")
-	dbUsn := os.Getenv("DB_USERNAME")
-	dbPass := os.Getenv("DB_PASSWORD")
+    dbHost := os.Getenv("DB_HOST")
+    dbName := os.Getenv("DB_NAME")
+    dbPort := os.Getenv("DB_PORT")
+    dbUsn := os.Getenv("DB_USERNAME")
+    dbPass := os.Getenv("DB_PASSWORD")
 
-	dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s sslmode=disable",
-		dbHost, dbUsn, dbPass, dbPort)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+    dsn := fmt.Sprintf("host=%s user=%s password=%s port=%s sslmode=disable",
+        dbHost, dbUsn, dbPass, dbPort)
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    if err != nil {
+        return nil, fmt.Errorf("error connecting to database server: %v", err)
+    }
 
-	// Create database
-	createDbCmd := fmt.Sprintf("CREATE DATABASE \"%s\";", dbName)
-	if res := db.Exec(createDbCmd); res.Error != nil {
-		if !strings.Contains(res.Error.Error(), "already exists") {
-			return nil, fmt.Errorf("Error creating database: %v", res.Error)
-		}
-	}
+    var dbExists bool
+    checkDbQuery := fmt.Sprintf("SELECT 1 FROM pg_database WHERE datname = '%s';", dbName)
+    if err := db.Raw(checkDbQuery).Scan(&dbExists).Error; err != nil {
+        return nil, fmt.Errorf("error checking database existence: %v", err)
+    }
 
-	// Close first connection
-	sqlDB, err := db.DB()
-	if err != nil {
-		return nil, err
-	}
-	sqlDB.Close()
+    if !dbExists {
+        createDbCmd := fmt.Sprintf("CREATE DATABASE \"%s\";", dbName)
+        if res := db.Exec(createDbCmd); res.Error != nil {
+            return nil, fmt.Errorf("error creating database: %v", res.Error)
+        }
+        fmt.Printf("Database \"%s\" created successfully.\n", dbName)
+    } else {
+        fmt.Printf("Database \"%s\" already exists.\n", dbName)
+    }
 
-	// Connect with database name
-	dsnWithDB := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable",
-		dbHost, dbUsn, dbPass, dbPort, dbName)
-	dbWithName, err := gorm.Open(postgres.Open(dsnWithDB), &gorm.Config{})
-	if err != nil {
-		return nil, err
-	}
+    sqlDB, err := db.DB()
+    if err != nil {
+        return nil, err
+    }
+    sqlDB.Close()
 
-	return &Database{db: dbWithName}, nil
+    dsnWithDB := fmt.Sprintf("host=%s user=%s password=%s port=%s dbname=%s sslmode=disable",
+        dbHost, dbUsn, dbPass, dbPort, dbName)
+    dbWithName, err := gorm.Open(postgres.Open(dsnWithDB), &gorm.Config{})
+    if err != nil {
+        return nil, fmt.Errorf("error connecting to database \"%s\": %v", dbName, err)
+    }
+
+    return &Database{db: dbWithName}, nil
 }
+
 
 func (d *Database) GetDB() *gorm.DB {
 	return d.db
